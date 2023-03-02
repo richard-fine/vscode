@@ -802,12 +802,17 @@ export interface IDebugAdapterInlineImpl extends IDisposable {
 	handleMessage(message: DebugProtocol.Message): void;
 }
 
+export interface IDebugAdapterWebsocket {
+	readonly type: 'websocket';
+	readonly url: URL;
+}
+
 export interface IDebugAdapterImpl {
 	readonly type: 'implementation';
 	readonly implementation: IDebugAdapterInlineImpl;
 }
 
-export type IAdapterDescriptor = IDebugAdapterExecutable | IDebugAdapterServer | IDebugAdapterNamedPipeServer | IDebugAdapterImpl;
+export type IAdapterDescriptor = IDebugAdapterExecutable | IDebugAdapterServer | IDebugAdapterNamedPipeServer | IDebugAdapterImpl | IDebugAdapterWebsocket;
 
 export interface IPlatformSpecificAdapterContribution {
 	program?: string;

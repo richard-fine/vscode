@@ -13,7 +13,7 @@ import * as strings from 'vs/base/common/strings';
 import { Promises } from 'vs/base/node/pfs';
 import * as nls from 'vs/nls';
 import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
-import { IDebugAdapterExecutable, IDebugAdapterNamedPipeServer, IDebugAdapterServer, IDebuggerContribution, IPlatformSpecificAdapterContribution } from 'vs/workbench/contrib/debug/common/debug';
+import { IDebugAdapterExecutable, IDebugAdapterNamedPipeServer, IDebugAdapterServer, IDebugAdapterWebsocket, IDebuggerContribution, IPlatformSpecificAdapterContribution } from 'vs/workbench/contrib/debug/common/debug';
 import { AbstractDebugAdapter } from '../common/abstractDebugAdapter';
 
 /**
@@ -387,5 +387,79 @@ export class ExecutableDebugAdapter extends StreamDebugAdapter {
 
 		// nothing found
 		return undefined;
+	}
+}
+
+/**
+ * An implementation that connects to a debug adapter via a WebSocket.
+*/
+export class WebsocketDebugAdapter extends AbstractDebugAdapter {
+
+	private socket!: WebSocket;
+
+	constructor(private adapterDescriptor: IDebugAdapterWebsocket) {
+		super();
+	}
+
+	startSession(): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			let connected = false;
+
+			const socket = new WebSocket(this.adapterDescriptor.url);
+			socket.onopen = () => {
+				this.socket = socket;
+				resolve();
+				connected = true;
+			};
+
+			socket.onclose = () => {
+				if (connected) {
+					this._onError.fire(new Error('connection closed'));
+				} else {
+					reject(new Error('connection closed'));
+				}
+			};
+
+			socket.onerror = (error) => {
+				if (connected) {
+					this._onError.fire(new Error('WebSocket error'));
+				} else {
+					reject(error);
+				}
+			};
+
+			socket.onmessage = (data: MessageEvent) => {
+				if (connected) {
+					this.handleData(data.data);
+				} else {
+					reject(data);
+				}
+			};
+		});
+	}
+
+	stopSession(): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			if (this.socket) {
+				this.socket.onclose = null;
+				this.socket.close();
+			}
+			resolve();
+		});
+	}
+
+	sendMessage(message: DebugProtocol.ProtocolMessage): void {
+		if (this.socket) {
+			const json = JSON.stringify(message);
+			this.socket.send(json);
+		}
+	}
+
+	private handleData(message: string): void {
+		try {
+			this.acceptMessage(<DebugProtocol.ProtocolMessage>JSON.parse(message));
+		} catch (e) {
+			this._onError.fire(new Error((e.message || e) + '\n' + message));
+		}
 	}
 }

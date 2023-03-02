@@ -21,7 +21,7 @@ import { IExtHostVariableResolverProvider } from 'vs/workbench/api/common/extHos
 import { IExtHostWorkspace } from 'vs/workbench/api/common/extHostWorkspace';
 import { AbstractDebugAdapter } from 'vs/workbench/contrib/debug/common/abstractDebugAdapter';
 import { IAdapterDescriptor } from 'vs/workbench/contrib/debug/common/debug';
-import { ExecutableDebugAdapter, NamedPipeDebugAdapter, SocketDebugAdapter } from 'vs/workbench/contrib/debug/node/debugAdapter';
+import { ExecutableDebugAdapter, NamedPipeDebugAdapter, SocketDebugAdapter, WebsocketDebugAdapter } from 'vs/workbench/contrib/debug/node/debugAdapter';
 import { hasChildProcesses, prepareCommand } from 'vs/workbench/contrib/debug/node/terminals';
 import { ExtensionDescriptionRegistry } from 'vs/workbench/services/extensions/common/extensionDescriptionRegistry';
 import type * as vscode from 'vscode';
@@ -54,6 +54,8 @@ export class ExtHostDebugService extends ExtHostDebugServiceBase {
 				return new NamedPipeDebugAdapter(adapter);
 			case 'executable':
 				return new ExecutableDebugAdapter(adapter, session.type);
+			case 'websocket':
+				return new WebsocketDebugAdapter(adapter);
 		}
 		return super.createDebugAdapter(adapter, session);
 	}
