@@ -15790,6 +15790,21 @@ declare module 'vscode' {
 	}
 
 	/**
+	 * Represents a debug adapter running as a websocket connection.
+	 */
+	export class DebugAdapterWebsocket {
+		/**
+		 * The URL that the websocket is connected to.
+		 */
+		readonly url: string;
+
+		/**
+		 * Create a description for a debug adapter running as a websocket connected to the specified URL.
+		 */
+		constructor(url: string);
+	}
+
+	/**
 	 * A debug adapter that implements the Debug Adapter Protocol can be registered with the editor if it implements the DebugAdapter interface.
 	 */
 	export interface DebugAdapter extends Disposable {

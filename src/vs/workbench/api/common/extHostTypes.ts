@@ -2979,6 +2979,15 @@ export class DebugAdapterNamedPipeServer implements vscode.DebugAdapterNamedPipe
 }
 
 @es5ClassCompat
+export class DebugAdapterWebsocket implements vscode.DebugAdapterWebsocket {
+	readonly url: string;
+
+	constructor(url: string) {
+		this.url = url;
+	}
+}
+
+@es5ClassCompat
 export class DebugAdapterInlineImplementation implements vscode.DebugAdapterInlineImplementation {
 	readonly implementation: vscode.DebugAdapter;
 

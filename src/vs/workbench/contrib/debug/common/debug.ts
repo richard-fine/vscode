@@ -804,7 +804,7 @@ export interface IDebugAdapterInlineImpl extends IDisposable {
 
 export interface IDebugAdapterWebsocket {
 	readonly type: 'websocket';
-	readonly url: URL;
+	readonly url: string;
 }
 
 export interface IDebugAdapterImpl {
